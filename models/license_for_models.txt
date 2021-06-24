@@ -1,0 +1,5 @@
+The source of the models is https://sketchfab.com/3d-models/limbic-system-7981dff55a8d40259aff2f1d53649ef6
+
+Based on: BodyParts3D, Copyright© The Database Center for Life Science 
+
+Licensed by CC Attribution-Share Alike 2.1 Japan.
