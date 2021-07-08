@@ -1,0 +1,44 @@
+﻿.wrapper {
+    position: relative;
+    max-height: 600px;
+    max-width: 600px;
+    border: 3px solid black;
+    padding: 1px;
+    margin: auto;
+    text-align: center;
+    background-image: radial-gradient(#04d9ff 30%,  #0c164f 70%, #1d1135 100%);
+}
+
+canvas {
+    position: relative;
+    max-height: 400px;
+}
+    
+p{
+    color: white;
+}
+
+.slider-wrapper{
+    display: flex;
+    justify-content: center;
+}
+
+.canvas-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 5px;
+}
+
+.btn-group{
+    display: flex;
+    justify-content: center;
+    padding: 5px;
+}
+
+.btn-group button {
+    float: left;
+}
+
+.btn-group button:hover {
+    background-color: #0099CC;
+}
