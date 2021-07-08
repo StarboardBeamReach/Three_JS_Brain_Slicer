@@ -1,0 +1,370 @@
+<!-- See license -->
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+        <title>Three JS - Brain Slicer</title>
+    </head>
+
+    <body>
+        <div class = "wrapper">
+            <div class = "canvas-wrapper">
+                <canvas width=400 height=400 id="myCanvas" ></canvas>
+            </div>
+
+            <p>Click and drag to move. Use the mouse wheel to zoom.</p> 
+            <p>Use buttons and slider to create cross sections. </p>
+
+            <div class="btn-group">
+                <!--<button id="button0">None</button>-->
+                <button id="button1">XZ Plane</button>
+                <button id="button2">XY Plane</button>
+                <button id="button3">YZ Plane</button>
+            </div>
+
+            <div class="slider-wrapper">
+                <input type="range" min="-50" max="50" value="1" class="slider" id="crossSectionSlider">
+            </div>
+            
+        </div>
+
+        <style>
+
+            .wrapper {
+                position: relative;
+                max-height: 600px;
+                max-width: 600px;
+                border: 3px solid black;
+                padding: 1px;
+                margin: auto;
+                text-align: center;
+                background-image: radial-gradient(#04d9ff 30%,  #0c164f 70%, #1d1135 100%);
+            }
+
+            canvas {
+                position: relative;
+                max-height: 400px;
+            }
+    
+            p{
+                color: white;
+            }
+
+            .slider-wrapper{
+                display: flex;
+                justify-content: center;
+            }
+
+            .canvas-wrapper {
+                display: flex;
+                justify-content: center;
+                padding: 5px;
+            }
+
+            .btn-group{
+                display: flex;
+                justify-content: center;
+                padding: 5px;
+            }
+
+            .btn-group button {
+                float: left;
+            }
+
+            .btn-group button:hover {
+                background-color: #0099CC;
+            }
+            
+
+        </style>
+    </body>
+
+    <script type="module">
+
+        import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r127/build/three.module.js';
+        import {OrbitControls} from 'https://threejsfundamentals.org/threejs/resources/threejs/r127/examples/jsm/controls/OrbitControls.js';
+        import {OBJLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r127/examples/jsm/loaders/OBJLoader.js';
+        import {MTLLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r127/examples/jsm/loaders/MTLLoader.js';
+
+        const basehref = 'https://raw.githubusercontent.com/StarboardBeamReach/WebGL_Brain_Slicer/main/models/';
+        const imagehef = 'https://raw.githubusercontent.com/StarboardBeamReach/WebGL_Brain_Slicer/main/images/';
+
+        //file names are commented 
+        var filehrefs = [
+            "Amygdala.mtl",                                                         
+            "Amygdala.obj",                                                           
+            "Anterior_commissure.mtl",                                              
+            "Anterior_commissure.obj",                                                
+            "Caudate_nucleus1.mtl",                                                 
+            "Caudate_nucleus1.obj",                                                
+            "Caudate_nucleus2.mtl",                                                 
+            "Caudate_nucleus2.obj",                                                
+            "Cingulate_gyrus_right.mtl",                                            
+            "Cingulate_gyrus_right.obj",                                       
+            "Commissure_of_fornix1.mtl",                                            
+            "Commissure_of_fornix1.obj",                                       
+            "Commissure_of_fornix2.mtl",                                            
+            "Commissure_of_fornix2.obj",                                       
+            "Corpus_callosum2.mtl",                                                 
+            "Corpus_callosum2.obj",                                                 
+            "Fornix_right.mtl",                                                     
+            "Fornix_right.obj",                                                     
+            "Fornix_right1.mtl",                                                    
+            "Fornix_right1.obj",                                                    
+            "Hypothalamus_and_pituitary.mtl",                                       
+            "Hypothalamus_and_pituitary.obj",                                  
+            "Left_cerebellar_hemisphere.mtl",                                       
+            "Left_cerebellar_hemisphere.obj",                                   
+            "Left_globus_pallidus.mtl",                                             
+            "Left_globus_pallidus.obj",                                             
+            "Left_globus_pallidus1.mtl",                                            
+            "Left_globus_pallidus1.obj",                                             
+            "Left_hemisphere_transparent.mtl",                                      
+            "Left_hemisphere_transparent.obj",                                      
+            "Left_hippocampus.mtl",                                                 
+            "Left_hippocampus.obj",                                                   
+            "Left_insula.mtl",                                                      
+            "Left_insula.obj",                                                        
+            "Left_internal_capsule.mtl",                                            
+            "Left_internal_capsule.obj",                                            
+            "Left_internal_capsule1.mtl",                                           
+            "Left_internal_capsule1.obj",                                           
+            "Left_putamen.mtl",                                                     
+            "Left_putamen.obj",                                                       
+            "Midbrain.mtl",                                                         
+            "Midbrain.obj",                                                         
+            "Midbrain1.mtl",                                                        
+            "Midbrain1.obj",                                                          
+            "Optic_chiasm.mtl",                                                     
+            "Optic_chiasm.obj",                                                     
+            "Optic_chiasm1.mtl",                                                    
+            "Optic_chiasm1.obj",                                                      
+            "Pineal_gland.mtl",                                                     
+            "Pineal_gland.obj",                                                     
+            "Pineal_gland1.mtl",                                                    
+            "Pineal_gland1.obj",                                                      
+            "PM3D_Sphereinder3D2.mtl",                                              
+            "PM3D_Sphereinder3D2.obj",                                                
+            "Pons.mtl",                                                             
+            "Pons.obj",                                                             
+            "Pons1.mtl",                                                            
+            "Pons1.obj",                                                              
+            "Right_cerebellar_hemisphere1.mtl",                                     
+            "Right_cerebellar_hemisphere1.obj",                                 
+            "Right_choiroid_plexus.mtl",                                            
+            "Right_choiroid_plexus.obj",                                              
+            "Right_Hemisphere_transparent.mtl",                                     
+            "Right_Hemisphere_transparent.obj",                                     
+            "Right_thalamus.mtl",                                                   
+            "Right_thalamus.obj",                                                   
+            "Right_thalamus1.mtl",                                                  
+            "Right_thalamus1.obj",                                                    
+            "Right_thalamus2.mtl",                                                  
+            "Right_thalamus2.obj",                                                    
+            "Right_thalamus2_1.mtl",                                                
+            "Right_thalamus2_1.obj",                                                  
+            "Septum_pellucidum1.mtl",                                               
+            "Septum_pellucidum1.obj",                                                 
+            "Septum_pellucidum2.mtl",                                               
+            "Septum_pellucidum2.obj",                                                 
+            "Stria_Medullaris.mtl",                                                 
+            "Stria_Medullaris.obj",                                                 
+            "Stria_Medullaris1.mtl",                                                
+            "Stria_Medullaris1.obj",                                                
+            "Stria_terminalis3.mtl",                                                
+            "Stria_terminalis3.obj",                                                  
+            "Superior_colliculus.mtl",                                              
+            "Superior_colliculus.obj",                                              
+            "Superior_colliculus1.mtl",                                             
+            "Superior_colliculus1.obj",                                               
+        ]
+
+
+        function main() {
+
+            const canvas = document.querySelector('#myCanvas');
+            const renderer = new THREE.WebGLRenderer({canvas, alpha: true});
+
+            var slider = document.getElementById("crossSectionSlider");
+            //var btn0 = document.getElementById("button0");
+            var btn1 = document.getElementById("button1");
+            var btn2 = document.getElementById("button2");
+            var btn3 = document.getElementById("button3");
+            var buttonState = 1;
+            updateCrossSection();
+
+            const fov = 45;
+            const aspect = 2;  // the canvas default
+            const near = 0.1;
+            const far = 250;
+            const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+            camera.position.set(100, 100, 100);
+
+            const controls = new OrbitControls(camera, canvas);
+            controls.target.set(0, 5, 0);
+            controls.update();
+
+            const scene = new THREE.Scene();
+            scene.background = null;
+
+         
+            /*future expansion - add event listener to restore graphics if hardware limitations cause renderer to lose context   
+            canvas.addEventListener('webglcontextrestored', function(e) {
+            console.log("inside event listener");
+            console.log(e);
+            }, false);*/
+        
+
+            //set up lighting variables
+            const color = 0xFFFFFF;
+            const intensity = 1;
+            const light = new THREE.DirectionalLight(color, intensity);
+            light.position.set(5, 10, 2);
+            scene.add(light);
+            scene.add(light.target);
+  
+
+            //iterate thru array and load obj and mtl files
+            for (var i=0; i<filehrefs.length; i++){
+                addObjectWithMaterial(basehref.concat(filehrefs[i]),basehref.concat(filehrefs[i+1]) );
+                i++; //since we know the order of the obj and mtl files in the array, we can incrememnt twice
+            }
+  
+            //set up local clipping variables
+            var localPlane = new THREE.Plane( new THREE.Vector3( 0, - 1, 0 ), 1 );
+            var globalPlane = new THREE.Plane( new THREE.Vector3( slider.value, 0, 0 ), 1 );
+            renderer.clippingPlanes = [ globalPlane ];
+            renderer.localClippingEnabled = true;
+
+            var material = new THREE.MeshPhongMaterial( {
+                clippingPlanes: [ localPlane ],
+                clipShadows: true
+            } );
+
+
+            slider.oninput = function() {
+                updateCrossSection();
+            }
+            
+            /*future expansion - disable all clipping plnaes
+            btn0.onclick = function(){
+                buttonState = 0;
+                console.log("clicked button 0");
+                console.log(buttonState);
+                updateCrossSection();
+            }*/
+
+            btn1.onclick = function(){
+                buttonState = 1;
+                //console.log(buttonState);
+                updateCrossSection();
+                render();
+            }
+    
+            btn2.onclick = function(){
+                buttonState = 2;
+                //console.log(buttonState);
+                updateCrossSection();
+                render();
+            }
+    
+            btn3.onclick = function(){
+                buttonState = 3;
+                //console.log(buttonState);
+                updateCrossSection();
+                render();
+            }
+    
+            function updateCrossSection(){
+      
+                /*
+                if(buttonState == 0){
+                console.log(renderer.localClippingEnabled);
+                btn0.style.background = 'blue';
+                btn1.style.background = 'white';
+                btn2.style.background = 'white';
+                btn3.style.background = 'white';
+
+                } else if(buttonState == 1){
+                */
+                if(buttonState == 1){
+                    renderer.localClippingEnabled = true;
+                    globalPlane = new THREE.Plane( new THREE.Vector3( 0, slider.value, 0 ), 1 );
+                    //btn0.style.background = 'white';
+                    btn1.style.background = 'blue';
+                    btn2.style.background = 'white';
+                    btn3.style.background = 'white';
+
+                } else if(buttonState == 2){
+                    renderer.localClippingEnabled = true;
+                    globalPlane = new THREE.Plane( new THREE.Vector3( 0, 0, slider.value ), 1 );
+                    //btn0.style.background = 'white';
+                    btn1.style.background = 'white';
+                    btn2.style.background = 'blue';
+                    btn3.style.background = 'white';
+
+                } else if(buttonState == 3){
+                    renderer.localClippingEnabled = true;
+                    globalPlane = new THREE.Plane( new THREE.Vector3( slider.value, 0, 0 ), 1 );
+                    //btn0.style.background = 'white';
+                    btn1.style.background = 'white';
+                    btn2.style.background = 'white';
+                    btn3.style.background = 'blue';
+                }
+            }
+    
+            function resizeRendererToDisplaySize(renderer) {
+
+                const canvas = renderer.domElement;
+                const width = canvas.clientWidth;
+                const height = canvas.clientHeight;
+                const needResize = canvas.width !== width || canvas.height !== height;
+
+                if (needResize) {
+                    renderer.setSize(width, height, false);
+                }
+
+                return needResize;
+            }
+
+  
+            function addObjectWithMaterial(objecthref, materialhref){
+
+                const mtlLoader = new MTLLoader();
+                mtlLoader.load(objecthref, (mtl) => {
+                    mtl.preload();
+                    const objLoader = new OBJLoader();
+                    objLoader.setMaterials(mtl);
+                    objLoader.load(materialhref, (root) => {
+                        scene.add(root);
+                     });
+                });
+            }
+
+            function render() {
+
+                if (resizeRendererToDisplaySize(renderer)) {
+                    const canvas = renderer.domElement;
+                    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                    camera.updateProjectionMatrix();
+                }
+
+                renderer.clippingPlanes = [ globalPlane ];
+    
+                renderer.render(scene, camera);
+
+                requestAnimationFrame(render);
+            }
+
+            requestAnimationFrame(render);
+
+        } //closes main
+
+    main();
+
+    </script>
+
+</html>
+
